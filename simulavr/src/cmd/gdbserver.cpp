@@ -334,14 +334,14 @@ void GdbServer::avr_core_flash_write(int addr, word val) {
     core->Flash->Decode(addr);
 }
 
-void GdbServer::avr_core_flash_write_hi8(int addr, byte val) {
+void GdbServer::avr_core_flash_write_hi8(int addr, uint8_t val) {
     if(addr >= (int)core->Flash->GetSize())
         avr_error("try to write in flash after last valid address! (hi8)");
     core->Flash->WriteMemByte(val, addr);
     core->Flash->Decode();
 }
 
-void GdbServer::avr_core_flash_write_lo8(int addr, byte val) {
+void GdbServer::avr_core_flash_write_lo8(int addr, uint8_t val) {
     if(addr + 1 >= (int)core->Flash->GetSize())
         avr_error("try to write in flash after last valid address! (lo8)");
     core->Flash->WriteMemByte(val, addr + 1);
@@ -468,7 +468,7 @@ void GdbServer::gdb_send_hex_reply(const char *reply, const char *reply_to_encod
 {
     std::string result = reply;
     for(int i = 0; reply_to_encode[i] != '\0'; i++) {
-        byte val = reply_to_encode[i];
+        uint8_t val = reply_to_encode[i];
         result += HEX_DIGIT[(val >> 4) & 0xf];
         result += HEX_DIGIT[val & 0xf];
     }
@@ -548,7 +548,7 @@ void GdbServer::gdb_read_registers( )
 same and in the same order as described in gdb_read_registers() above. */
 void GdbServer::gdb_write_registers(const char *pkt) {
     int   i;
-    byte  bval;
+    uint8_t  bval;
     dword val;                  /* ensure it's a 32 bit value */
 
     /* 32 gen purpose working registers */
@@ -636,17 +636,17 @@ void GdbServer::gdb_read_register(const char *pkt) {
 
     if ( (reg >= 0) && (reg < 32) )
     {                           /* general regs */
-        byte val = core->GetCoreReg(reg);
+        uint8_t val = core->GetCoreReg(reg);
         snprintf(reply, sizeof(reply), "%02x", val);
     }
     else if (reg == 32)         /* sreg */
     {
-        byte val = *(core->status);
+        uint8_t val = *(core->status);
         snprintf(reply, sizeof(reply), "%02x", val);
     }
     else if (reg == 33)         /* SP */
     {
-        byte spl, sph;
+        uint8_t spl, sph;
         unsigned long sp = core->stack->GetStackPointer();
         spl = sp & 0xff;
         sph = (sp >> 8) & 0xff;
@@ -761,13 +761,13 @@ int GdbServer::gdb_get_addr_len(const char *pkt, char a_end, char l_end, unsigne
 void GdbServer::gdb_read_memory(const char *pkt) {
     unsigned int addr = 0;
     int   len  = 0;
-    byte *buf;
+    uint8_t *buf;
     int   i;
     int   is_odd_addr;
 
     pkt += gdb_get_addr_len( pkt, ',', '\0', &addr, &len );
 
-    buf = avr_new0( byte, (len*2)+1 );
+    buf = avr_new0( uint8_t, (len*2)+1 );
 
     if ( (addr & MEM_SPACE_MASK) == EEPROM_OFFSET )
     {
@@ -841,7 +841,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 
             if ( avr_core_flash_read( addr, val ))
             {
-                byte bval;
+                uint8_t bval;
                 bval = val & 0xff;
                 buf[i++] = HEX_DIGIT[bval >> 4];
                 buf[i++] = HEX_DIGIT[bval & 0xf];
@@ -865,7 +865,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 
             if ( avr_core_flash_read( addr, val ))
             {
-                byte bval;
+                uint8_t bval;
 
                 bval &= 0xff;
                 buf[i++] = HEX_DIGIT[bval >> 4];
@@ -887,7 +887,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
            error_buf instead
          */
         static const size_t BUF_LEN = 10; // 10 is enough I hope :-)
-        byte* error_buf = avr_new0( byte, BUF_LEN ); 
+        uint8_t* error_buf = avr_new0( uint8_t, BUF_LEN ); 
         snprintf( (char*)error_buf, BUF_LEN, "E%02x", EIO );
         gdb_send_reply( (char*)error_buf );
         avr_free( error_buf );
@@ -903,7 +903,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 void GdbServer::gdb_write_memory(const char *pkt) {
     unsigned int addr = 0;
     int  len  = 0;
-    byte bval;
+    uint8_t bval;
     unsigned int  i;
     char reply[10];
 
