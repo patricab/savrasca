@@ -46,7 +46,7 @@ void RWWriteToFile::set(unsigned char val) {
 }
 
 unsigned char RWWriteToFile::get() const {
-    avr_warning("Invalid read access to RWWriteToFile register.");
+    //avr_warning("Invalid read access to RWWriteToFile register.");
     return 0;
 } 
 
